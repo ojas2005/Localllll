@@ -1,0 +1,216 @@
+name: localll
+
+x-service-env: &service-env
+  ASPNETCORE_ENVIRONMENT: Development
+  ConnectionStrings__Redis: redis:6379
+  ConnectionStrings__RabbitMq: rabbitmq://localll:localll_dev_password@rabbitmq
+  Jwt__Issuer: localll-identity
+  Jwt__Audience: localll
+  Jwt__SigningKey: dev-only-signing-key-change-me-in-production-0123456789
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_started
+    rabbitmq:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: localll
+      POSTGRES_PASSWORD: localll_dev_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localll"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      # Host port 6381: a Homebrew redis on this machine already owns 6379.
+      # Local `dotnet run` uses that brew redis; compose services use redis:6379 internally.
+      - "6381:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      # "guest" only permits loopback connections as seen by the server, which
+      # breaks under Docker Desktop's port proxy — use a real account instead.
+      RABBITMQ_DEFAULT_USER: localll
+      RABBITMQ_DEFAULT_PASS: localll_dev_password
+    ports:
+      - "5674:5672"
+      - "15674:15672"   # management UI
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  gateway:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Gateway/Localll.Gateway
+        SERVICE_DLL: Localll.Gateway.dll
+    environment:
+      <<: *service-env
+      ReverseProxy__Clusters__identity__Destinations__d1__Address: http://identity:8080/
+      ReverseProxy__Clusters__user__Destinations__d1__Address: http://user:8080/
+      ReverseProxy__Clusters__delivery__Destinations__d1__Address: http://delivery:8080/
+      ReverseProxy__Clusters__medicine__Destinations__d1__Address: http://medicine:8080/
+      ReverseProxy__Clusters__payment__Destinations__d1__Address: http://payment:8080/
+      ReverseProxy__Clusters__wallet__Destinations__d1__Address: http://wallet:8080/
+      ReverseProxy__Clusters__cybercafe__Destinations__d1__Address: http://cybercafe:8080/
+      ReverseProxy__Clusters__partner__Destinations__d1__Address: http://partner:8080/
+      ReverseProxy__Clusters__analytics__Destinations__d1__Address: http://analytics:8080/
+      ReverseProxy__Clusters__storeorders__Destinations__d1__Address: http://storeorders:8080/
+    ports:
+      - "8080:8080"
+
+  identity:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/Identity/Localll.Identity.API
+        SERVICE_DLL: Localll.Identity.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=identitydb;Username=localll;Password=localll_dev_password
+
+  user:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/User/Localll.User.API
+        SERVICE_DLL: Localll.User.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=userdb;Username=localll;Password=localll_dev_password
+
+  delivery:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/Delivery/Localll.Delivery.API
+        SERVICE_DLL: Localll.Delivery.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=deliverydb;Username=localll;Password=localll_dev_password
+
+  medicine:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/Medicine/Localll.Medicine.API
+        SERVICE_DLL: Localll.Medicine.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=medicinedb;Username=localll;Password=localll_dev_password
+
+  payment:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/Payment/Localll.Payment.API
+        SERVICE_DLL: Localll.Payment.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=paymentdb;Username=localll;Password=localll_dev_password
+
+  wallet:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/Wallet/Localll.Wallet.API
+        SERVICE_DLL: Localll.Wallet.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=walletdb;Username=localll;Password=localll_dev_password
+
+  partner:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/Partner/Localll.Partner.API
+        SERVICE_DLL: Localll.Partner.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=partnerdb;Username=localll;Password=localll_dev_password
+
+  cybercafe:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/CyberCafe/Localll.CyberCafe.API
+        SERVICE_DLL: Localll.CyberCafe.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=cybercafedb;Username=localll;Password=localll_dev_password
+
+  notification:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/Notification/Localll.Notification.API
+        SERVICE_DLL: Localll.Notification.API.dll
+    environment:
+      <<: *service-env
+
+  analytics:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/Analytics/Localll.Analytics.API
+        SERVICE_DLL: Localll.Analytics.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=analyticsdb;Username=localll;Password=localll_dev_password
+
+  storeorders:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+      args:
+        SERVICE_PROJECT: src/Services/StoreOrders/Localll.StoreOrders.API
+        SERVICE_DLL: Localll.StoreOrders.API.dll
+    environment:
+      <<: *service-env
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=storeordersdb;Username=localll;Password=localll_dev_password
+
+volumes:
+  postgres-data:
