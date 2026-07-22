@@ -14,5 +14,5 @@ TestResults/
 frontend/
 
 # Runtime-uploaded files (payment screenshots, etc.)
-wwwroot/uploads/*
-!wwwroot/uploads/.gitkeep
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/.gitkeep
