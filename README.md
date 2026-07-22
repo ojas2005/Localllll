@@ -45,13 +45,13 @@ Angular client
 
 ## Frontend (Angular 20)
 
-`frontend/` — standalone-component Angular app with signals, Tailwind design tokens,
-GSAP motion, a lazy-loaded Three.js hero (`@defer`, static fallback for weak devices),
-JWT auth with silent refresh, and role-guarded dashboards
-(Customer / Delivery Partner / Pharmacy / Admin).
+The frontend lives in a separate repo (`Localll_Frontend`) — a standalone-component
+Angular app with signals, Tailwind design tokens, GSAP motion, a lazy-loaded Three.js
+hero (`@defer`, static fallback for weak devices), JWT auth with silent refresh, and
+role-guarded dashboards (Customer / Delivery Partner / Pharmacy / Admin).
 
 ```bash
-cd frontend
+cd ../Localll_Frontend
 npm install
 npm start            # http://localhost:4200 — expects the gateway on :8080
 ```
