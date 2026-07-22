@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore Localll.slnx
+
+      - name: Build
+        run: dotnet build Localll.slnx --no-restore -c Release
+
+      - name: Test
+        run: dotnet test Localll.slnx --no-build -c Release --logger "trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build-test
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        service:
+          - { project: src/Gateway/Localll.Gateway, dll: Localll.Gateway.dll, image: gateway }
+          - { project: src/Services/Identity/Localll.Identity.API, dll: Localll.Identity.API.dll, image: identity }
+          - { project: src/Services/User/Localll.User.API, dll: Localll.User.API.dll, image: user }
+          - { project: src/Services/Delivery/Localll.Delivery.API, dll: Localll.Delivery.API.dll, image: delivery }
+          - { project: src/Services/Medicine/Localll.Medicine.API, dll: Localll.Medicine.API.dll, image: medicine }
+          - { project: src/Services/Payment/Localll.Payment.API, dll: Localll.Payment.API.dll, image: payment }
+          - { project: src/Services/Wallet/Localll.Wallet.API, dll: Localll.Wallet.API.dll, image: wallet }
+          - { project: src/Services/Partner/Localll.Partner.API, dll: Localll.Partner.API.dll, image: partner }
+          - { project: src/Services/CyberCafe/Localll.CyberCafe.API, dll: Localll.CyberCafe.API.dll, image: cybercafe }
+          - { project: src/Services/Notification/Localll.Notification.API, dll: Localll.Notification.API.dll, image: notification }
+          - { project: src/Services/Analytics/Localll.Analytics.API, dll: Localll.Analytics.API.dll, image: analytics }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: |
+          docker build -f infrastructure/docker/Dockerfile \
+            --build-arg SERVICE_PROJECT=${{ matrix.service.project }} \
+            --build-arg SERVICE_DLL=${{ matrix.service.dll }} \
+            -t localll/${{ matrix.service.image }}:${{ github.sha }} .
+      # Push to your registry here (GHCR/ECR/ACR) once credentials are configured.
