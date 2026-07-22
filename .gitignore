@@ -12,3 +12,7 @@ TestResults/
 # Not part of this repo
 .claude/
 frontend/
+
+# Runtime-uploaded files (payment screenshots, etc.)
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep
