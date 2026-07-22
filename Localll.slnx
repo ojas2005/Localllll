@@ -1,0 +1,49 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Localll.Common/Localll.Common.csproj" />
+    <Project Path="src/BuildingBlocks/Localll.Contracts/Localll.Contracts.csproj" />
+    <Project Path="src/BuildingBlocks/Localll.SharedKernel/Localll.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Gateway/">
+    <Project Path="src/Gateway/Localll.Gateway/Localll.Gateway.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Analytics/">
+    <Project Path="src/Services/Analytics/Localll.Analytics.API/Localll.Analytics.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/CyberCafe/">
+    <Project Path="src/Services/CyberCafe/Localll.CyberCafe.API/Localll.CyberCafe.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Delivery/">
+    <Project Path="src/Services/Delivery/Localll.Delivery.API/Localll.Delivery.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Identity/">
+    <Project Path="src/Services/Identity/Localll.Identity.API/Localll.Identity.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Medicine/">
+    <Project Path="src/Services/Medicine/Localll.Medicine.API/Localll.Medicine.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Notification/">
+    <Project Path="src/Services/Notification/Localll.Notification.API/Localll.Notification.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Partner/">
+    <Project Path="src/Services/Partner/Localll.Partner.API/Localll.Partner.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Payment/">
+    <Project Path="src/Services/Payment/Localll.Payment.API/Localll.Payment.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/StoreOrders/">
+    <Project Path="src/Services/StoreOrders/Localll.StoreOrders.API/Localll.StoreOrders.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/User/">
+    <Project Path="src/Services/User/Localll.User.API/Localll.User.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Wallet/">
+    <Project Path="src/Services/Wallet/Localll.Wallet.API/Localll.Wallet.API.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/UnitTests/">
+    <Project Path="tests/UnitTests/Localll.UnitTests/Localll.UnitTests.csproj" />
+  </Folder>
+</Solution>

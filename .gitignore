@@ -1,0 +1,14 @@
+bin/
+obj/
+*.user
+.vs/
+.vscode/
+.idea/
+*.log
+appsettings.*.local.json
+.DS_Store
+TestResults/
+
+# Not part of this repo
+.claude/
+frontend/
